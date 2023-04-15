@@ -5,9 +5,11 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'fireb
 import { db } from '../firebase';
 import CustomerForm from './CustomerForm';
 import DeadBodyList from './DeadBodyList';
+import {useCustomers} from '../contexts/CustomerContext'; 
+import {toast} from 'react-hot-toast'; 
 
 const CustomerList = () => {
-  const [customers, setCustomers] = useState([]);
+  const { customers, setCustomers} = useCustomers(); 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Fetch customers from Firestore
@@ -17,18 +19,32 @@ const CustomerList = () => {
   });
 
   const handleAddOrUpdateCustomer = async (customer) => {
+    try { 
     if (selectedCustomer) {
       // Update existing customer
       await updateDoc(doc(db, 'customers', selectedCustomer.id), customer);
       setSelectedCustomer(null);
+      toast.success('Customer updated successfully');
     } else {
       // Add new customer
       await addDoc(collection(db, 'customers'), customer);
+      toast.success('Customer added successfully');
     }
+
+  } 
+  catch(error) {
+    toast.error('Failed to save customer'); 
+  }
   };
 
   const handleDeleteCustomer = async (id) => {
-    await deleteDoc(doc(db, 'customers', id));
+    try { 
+      await deleteDoc(doc(db, 'customers', id));
+      toast.success('Customer deleted successfully'); 
+    }
+    catch(error){
+      toast.error('Failed to delete customer'); 
+    }
   };
 
   return (
@@ -60,7 +76,7 @@ const CustomerList = () => {
         </ul>
       </div>
 
-      <DeadBodyList customers={customers} />
+          {/* <DeadBodyList customers={customers}/> */}
     </div>
   );
 };

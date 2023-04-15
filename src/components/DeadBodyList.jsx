@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DeadBodyForm from './DeadBodyForm';
+import {toast} from 'react-hot-toast'; 
+
 
 const DeadBodyList = ({ customers }) => {
   const [deadBodies, setDeadBodies] = useState([]);
@@ -14,18 +16,31 @@ const DeadBodyList = ({ customers }) => {
   });
 
   const handleAddOrUpdateDeadBody = async (deadBody) => {
-    if (selectedDeadBody) {
-      // Update existing dead body
-await updateDoc(doc(db, 'deadBodies', selectedDeadBody.id), deadBody);
-setSelectedDeadBody(null);
-} else {
-// Add new dead body
-await addDoc(collection(db, 'deadBodies'), deadBody);
-}
-};
+    try { 
+      if (selectedDeadBody) {
+                  // Update existing dead body
+            await updateDoc(doc(db, 'deadBodies', selectedDeadBody.id), deadBody);
+            setSelectedDeadBody(null);
+            toast.success('Dead body updated successfully'); 
+            } else {
+            // Add new dead body
+            await addDoc(collection(db, 'deadBodies'), deadBody);
+            toast.success('Dead body added successfully')
+            }
+    } 
+    catch (error){
+      toast.error('Failed to save dead body'); 
+    }
+    };
 
 const handleDeleteDeadBody = async (id) => {
-await deleteDoc(doc(db, 'deadBodies', id));
+  try { 
+    await deleteDoc(doc(db, 'deadBodies', id));
+    toast.success('Dead body deleted successfully'); 
+  } catch (error){
+    toast.error('Failed to delete Dead Body successfully'); 
+  }
+
 };
 
 const getCustomerName = (customerId) => {
